@@ -94,7 +94,7 @@ export default function Home() {
 			{siteContent.enableChristmas && <SnowfallBackground zIndex={2} count={!maxSM ? 125 : 20} />}
 			<ConfigDialog open={configDialogOpen} onClose={() => setConfigDialogOpen(false)} />
 
-			<Live2DViewer fixed />
+			{!maxSM && <Live2DViewer fixed />}
 		</>
 	)
 }
