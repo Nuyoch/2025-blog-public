@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { live2dDialogs } from '@/config/live2d-dialogs'
 
 /** PIXI Application 实例（CDN 加载，无类型包） */
 interface PixiAppInstance {
@@ -23,7 +24,7 @@ const CDN_SCRIPTS = [
 	'https://cdn.jsdelivr.net/npm/pixi-live2d-display/dist/cubism4.min.js'
 ]
 
-const MODEL_URL = '/live2d/live2d.model3.json'
+const MODEL_URL = '/live2d/Nahida_1080/Nahida_1080.model3.json'
 
 function loadScript(src: string): Promise<void> {
 	return new Promise((resolve, reject) => {
@@ -40,10 +41,22 @@ function loadScript(src: string): Promise<void> {
 	})
 }
 
-export default function Live2DViewer() {
+export default function Live2DViewer({ fixed = false }: { fixed?: boolean }) {
 	const containerRef = useRef<HTMLDivElement>(null)
 	const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading')
 	const [errorMsg, setErrorMsg] = useState<string>('')
+	const [currentDialog, setCurrentDialog] = useState<string | null>(null)
+	const [dialogIndex, setDialogIndex] = useState(0)
+
+	const handleModelClick = () => {
+		const dialog = live2dDialogs[dialogIndex]
+		setCurrentDialog(dialog.text)
+		setDialogIndex((prev) => (prev + 1) % live2dDialogs.length)
+
+		setTimeout(() => {
+			setCurrentDialog(null)
+		}, 3000)
+	}
 
 	useEffect(() => {
 		const container = containerRef.current
@@ -91,10 +104,10 @@ export default function Live2DViewer() {
 				const model = await Live2DModel.from(MODEL_URL)
 				app.stage.addChild(model)
 
-				model.anchor.set(0.5, 0.5)
+				model.anchor.set(0.7, 1)
 				model.x = width / 2
-				model.y = height / 2
-				model.scale.set(0.25, 0.25)
+				model.y = height
+				model.scale.set(fixed ? 0.08 : 0.12, fixed ? 0.08 : 0.12)
 
 				setStatus('ready')
 			} catch (err) {
@@ -114,10 +127,18 @@ export default function Live2DViewer() {
 	}, [])
 
 	return (
-		<div className='relative aspect-square w-full overflow-hidden rounded-full'>
-			<div ref={containerRef} className='absolute inset-0 h-full w-full' />
-			{status === 'loading' && <div className='text-secondary absolute inset-0 flex items-center justify-center'>加载 Live2D 模型中…</div>}
-			{status === 'error' && <div className='absolute inset-0 flex items-center justify-center p-4 text-center text-red-500'>{errorMsg}</div>}
+		<div className={fixed ? 'fixed bottom-4 left-4 z-40 h-100 w-100' : 'relative h-[800px] w-[800px]'}>
+			<div ref={containerRef} className='absolute inset-0 h-full w-full' onClick={handleModelClick} />
+			{status === 'loading' && <div className='text-secondary absolute inset-0 flex items-center justify-center text-xs'>加载中…</div>}
+			{status === 'error' && <div className='absolute inset-0 flex items-center justify-center p-4 text-center text-xs text-red-500'>{errorMsg}</div>}
+			{currentDialog && (
+				<div className={`pointer-events-none absolute ${fixed ? 'left-1/2 left-[35%] top-[-7%]' : 'left-1/2 left-[40%] top-[20%]'} -translate-x-1/2 animate-fade-in`}>
+					<div className='relative bg-white px-6 py-3 rounded-2xl shadow-lg'>
+						<div className='absolute -bottom-2 left-1/2 -translate-x-1/2 h-0 w-0 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-t-[12px] border-t-white' />
+						<p className='text-sm font-medium text-gray-800'>{currentDialog}</p>
+					</div>
+				</div>
+			)}
 		</div>
 	)
 }
