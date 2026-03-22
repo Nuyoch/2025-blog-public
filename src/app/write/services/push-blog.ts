@@ -169,11 +169,47 @@ export async function pushBlog(params: PushBlogParams): Promise<void> {
 
 	// create commit
 	toast.info('正在创建提交...')
-	const commitData = await createCommit(token, GITHUB_CONFIG.OWNER, GITHUB_CONFIG.REPO, commitMessage, treeData.sha, [latestCommitSha])
+	let commitData = await createCommit(token, GITHUB_CONFIG.OWNER, GITHUB_CONFIG.REPO, commitMessage, treeData.sha, [latestCommitSha])
 
-	// update branch reference
+	// update branch reference with retry logic
 	toast.info('正在更新分支...')
-	await updateRef(token, GITHUB_CONFIG.OWNER, GITHUB_CONFIG.REPO, `heads/${GITHUB_CONFIG.BRANCH}`, commitData.sha)
+	let updateSuccess = false
+	let currentCommitSha = commitData.sha
+	
+	for (let attempt = 0; attempt < 3; attempt++) {
+		try {
+			console.log('Updating ref attempt:', attempt + 1, {
+				ref: `heads/${GITHUB_CONFIG.BRANCH}`,
+				sha: currentCommitSha,
+				force: false
+			})
+			await updateRef(token, GITHUB_CONFIG.OWNER, GITHUB_CONFIG.REPO, `heads/${GITHUB_CONFIG.BRANCH}`, currentCommitSha)
+			updateSuccess = true
+			break
+		} catch (error: any) {
+			console.error(`Update ref attempt ${attempt + 1} failed:`, error)
+			
+			if (attempt < 2 && error.message.includes('422')) {
+				console.log('Branch was updated, retrying with latest commit...')
+				await new Promise(resolve => setTimeout(resolve, 1000 * (attempt + 1)))
+				
+				const newRefData = await getRef(token, GITHUB_CONFIG.OWNER, GITHUB_CONFIG.REPO, `heads/${GITHUB_CONFIG.BRANCH}`)
+				const newLatestCommitSha = newRefData.sha
+				
+				commitData = await createCommit(token, GITHUB_CONFIG.OWNER, GITHUB_CONFIG.REPO, commitMessage, treeData.sha, [newLatestCommitSha])
+				currentCommitSha = commitData.sha
+			} else if (attempt < 2) {
+				console.log('Retrying after delay...')
+				await new Promise(resolve => setTimeout(resolve, 1000 * (attempt + 1)))
+			} else {
+				throw error
+			}
+		}
+	}
+
+	if (!updateSuccess) {
+		throw new Error('更新分支失败，请重试')
+	}
 
 	toast.success('发布成功！')
 }

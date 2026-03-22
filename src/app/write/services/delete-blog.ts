@@ -40,10 +40,37 @@ export async function deleteBlog(slug: string): Promise<void> {
 
 	toast.info('正在创建提交...')
 	const treeData = await createTree(token, GITHUB_CONFIG.OWNER, GITHUB_CONFIG.REPO, treeItems, latestCommitSha)
-	const commitData = await createCommit(token, GITHUB_CONFIG.OWNER, GITHUB_CONFIG.REPO, `删除文章: ${slug}`, treeData.sha, [latestCommitSha])
+	let commitData = await createCommit(token, GITHUB_CONFIG.OWNER, GITHUB_CONFIG.REPO, `删除文章: ${slug}`, treeData.sha, [latestCommitSha])
 
 	toast.info('正在更新分支...')
-	await updateRef(token, GITHUB_CONFIG.OWNER, GITHUB_CONFIG.REPO, `heads/${GITHUB_CONFIG.BRANCH}`, commitData.sha)
+	let updateSuccess = false
+	let currentCommitSha = commitData.sha
+	
+	for (let attempt = 0; attempt < 3; attempt++) {
+		try {
+			await updateRef(token, GITHUB_CONFIG.OWNER, GITHUB_CONFIG.REPO, `heads/${GITHUB_CONFIG.BRANCH}`, currentCommitSha)
+			updateSuccess = true
+			break
+		} catch (error: any) {
+			if (attempt < 2 && error.message.includes('422')) {
+				await new Promise(resolve => setTimeout(resolve, 1000 * (attempt + 1)))
+				
+				const newRefData = await getRef(token, GITHUB_CONFIG.OWNER, GITHUB_CONFIG.REPO, `heads/${GITHUB_CONFIG.BRANCH}`)
+				const newLatestCommitSha = newRefData.sha
+				
+				commitData = await createCommit(token, GITHUB_CONFIG.OWNER, GITHUB_CONFIG.REPO, `删除文章: ${slug}`, treeData.sha, [newLatestCommitSha])
+				currentCommitSha = commitData.sha
+			} else if (attempt < 2) {
+				await new Promise(resolve => setTimeout(resolve, 1000 * (attempt + 1)))
+			} else {
+				throw error
+			}
+		}
+	}
+
+	if (!updateSuccess) {
+		throw new Error('更新分支失败，请重试')
+	}
 
 	toast.success('删除成功！请等待页面部署后刷新')
 }

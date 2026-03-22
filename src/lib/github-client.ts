@@ -157,20 +157,34 @@ export async function createCommit(token: string, owner: string, repo: string, m
 	return { sha: data.sha }
 }
 
-export async function updateRef(token: string, owner: string, repo: string, ref: string, sha: string, force = false): Promise<void> {
-	const res = await fetch(`${GH_API}/repos/${owner}/${repo}/git/refs/${encodeURIComponent(ref)}`, {
-		method: 'PATCH',
-		headers: {
-			Authorization: `Bearer ${token}`,
-			Accept: 'application/vnd.github+json',
-			'X-GitHub-Api-Version': '2022-11-28',
-			'Content-Type': 'application/json'
-		},
-		body: JSON.stringify({ sha, force })
-	})
-	if (res.status === 401) handle401Error()
-	if (res.status === 422) handle422Error()
-	if (!res.ok) throw new Error(`update ref failed: ${res.status}`)
+export async function updateRef(token: string, owner: string, repo: string, ref: string, sha: string, force = false, retries = 3): Promise<void> {
+	for (let attempt = 0; attempt < retries; attempt++) {
+		const res = await fetch(`${GH_API}/repos/${owner}/${repo}/git/refs/${encodeURIComponent(ref)}`, {
+			method: 'PATCH',
+			headers: {
+				Authorization: `Bearer ${token}`,
+				Accept: 'application/vnd.github+json',
+				'X-GitHub-Api-Version': '2022-11-28',
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({ sha, force })
+		})
+		if (res.status === 401) handle401Error()
+		if (res.status === 422) {
+			const errorData = await res.json().catch(() => ({}))
+			console.error('updateRef 422 error:', JSON.stringify(errorData))
+			
+			if (attempt < retries - 1) {
+				console.log(`Retrying updateRef (attempt ${attempt + 1}/${retries})...`)
+				await new Promise(resolve => setTimeout(resolve, 1000 * (attempt + 1)))
+				continue
+			}
+			
+			handle422Error()
+		}
+		if (!res.ok) throw new Error(`update ref failed: ${res.status}`)
+		return
+	}
 }
 
 export async function readTextFileFromRepo(token: string, owner: string, repo: string, path: string, ref: string): Promise<string | null> {
