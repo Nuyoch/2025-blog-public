@@ -1,5 +1,18 @@
 [
   {
+    "slug": "vue3-md",
+    "title": "Vue3基础篇总结",
+    "tags": [
+      "前端",
+      "Vue"
+    ],
+    "date": "2026-03-25T09:31",
+    "summary": "Vue3基础篇总结",
+    "cover": "/blogs/vue3-md/6f7bd72185ee28a8.jpg",
+    "hidden": false,
+    "category": "总结"
+  },
+  {
     "slug": "elysia-sing",
     "title": "",
     "tags": [],
