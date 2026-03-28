@@ -1,17 +1,5 @@
 [
   {
-    "slug": "IDE-插件1",
-    "title": "IDE AI插件",
-    "tags": [
-      "插件",
-      "Vibe Coding"
-    ],
-    "date": "2026-03-26T22:38",
-    "summary": "",
-    "hidden": false,
-    "category": ""
-  },
-  {
     "slug": "elysia-sing",
     "title": "",
     "tags": [],
@@ -203,16 +191,6 @@
     "cover": "/blogs/wave-ball/86d118420c399cdb.webp",
     "hidden": false,
     "category": "代码实现"
-  },
-  {
-    "slug": "fish-animation",
-    "title": "鱼鱼动画",
-    "tags": [],
-    "date": "2026-01-12T10:43",
-    "summary": "规划草稿",
-    "cover": "https://www.yysuni.com/images/pictures/b346636da687740b.webp",
-    "hidden": true,
-    "category": ""
   },
   {
     "slug": "love-island",
