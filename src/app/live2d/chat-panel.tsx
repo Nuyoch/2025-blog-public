@@ -98,7 +98,7 @@ export default function ChatPanel({ isOpen, onClose }: ChatPanelProps) {
 						{isStreaming && (
 							<div className='mb-3 flex justify-start'>
 								<div className='mr-2 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#35bfab]/20 text-sm'>
-									<img src='/images/avatar.png' alt='纳西妲' className='h-6 w-6 rounded-full object-cover' />
+									
 								</div>
 								<div className='rounded-2xl rounded-bl-md bg-white/80 px-4 py-2.5 backdrop-blur-sm'>
 									<div className='flex gap-1'>
