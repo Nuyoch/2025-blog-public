@@ -41,7 +41,7 @@ function loadScript(src: string): Promise<void> {
 	})
 }
 
-export default function Live2DViewer({ fixed = false }: { fixed?: boolean }) {
+export default function Live2DViewer({ fixed = false, onModelClick }: { fixed?: boolean; onModelClick?: () => void }) {
 	const containerRef = useRef<HTMLDivElement>(null)
 	const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading')
 	const [errorMsg, setErrorMsg] = useState<string>('')
@@ -56,6 +56,8 @@ export default function Live2DViewer({ fixed = false }: { fixed?: boolean }) {
 		setTimeout(() => {
 			setCurrentDialog(null)
 		}, 3000)
+
+		onModelClick?.()
 	}
 
 	useEffect(() => {
