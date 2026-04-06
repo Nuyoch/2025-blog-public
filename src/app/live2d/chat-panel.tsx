@@ -96,19 +96,16 @@ export default function ChatPanel({ isOpen, onClose }: ChatPanelProps) {
 							<ChatMessageItem key={msg.id} message={msg} />
 						))}
 						{isStreaming && (
-							<div className='mb-3 flex justify-start'>
-								<div className='mr-2 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#35bfab]/20 text-sm'>
-									
-								</div>
-								<div className='rounded-2xl rounded-bl-md bg-white/80 px-4 py-2.5 backdrop-blur-sm'>
-									<div className='flex gap-1'>
-										<span className='h-2 w-2 animate-bounce rounded-full bg-[#35bfab]' style={{ animationDelay: '0ms' }} />
-										<span className='h-2 w-2 animate-bounce rounded-full bg-[#35bfab]' style={{ animationDelay: '150ms' }} />
-										<span className='h-2 w-2 animate-bounce rounded-full bg-[#35bfab]' style={{ animationDelay: '300ms' }} />
-									</div>
-								</div>
-							</div>
-						)}
+    <div className='mb-3 flex justify-start'>
+        <div className='rounded-2xl bg-white/80 px-4 py-2.5 backdrop-blur-sm'>
+            <div className='flex gap-1'>
+                <span className='h-2 w-2 animate-bounce rounded-full bg-[#35bfab]' style={{ animationDelay: '0ms' }} />
+                <span className='h-2 w-2 animate-bounce rounded-full bg-[#35bfab]' style={{ animationDelay: '150ms' }} />
+                <span className='h-2 w-2 animate-bounce rounded-full bg-[#35bfab]' style={{ animationDelay: '300ms' }} />
+            </div>
+        </div>
+    </div>
+)}
 						{error && (
 							<div className='rounded-lg bg-red-50 px-3 py-2 text-center text-xs text-red-500'>
 								{error}
