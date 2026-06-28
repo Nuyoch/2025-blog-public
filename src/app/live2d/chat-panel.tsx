@@ -83,7 +83,7 @@ export default function ChatPanel({ isOpen, onClose }: ChatPanelProps) {
 					<div className='flex-1 overflow-y-auto px-4 py-4'>
 						{messages.length === 0 && (
 							<div className='flex h-full flex-col items-center justify-center text-center'>
-								<img src='/images/nihida.png' alt='纳西妲' className='mb-3 h-9 w-9' />
+								<img src='/images/nihida.png' alt='纳西妲' className='mb-3 h-[72px] w-[72px]' />
 								<p className='text-sm text-gray-500'>
 									点击纳西妲开始对话
 								</p>
